@@ -1,5 +1,4 @@
+flatlib==0.2.5
+pytz
 fastapi
 uvicorn
-flatlib
-pyswisseph
-python-dateutil
