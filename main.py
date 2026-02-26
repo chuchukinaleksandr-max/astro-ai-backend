@@ -8,14 +8,16 @@ from flatlib import aspects, const
 app = FastAPI()
 
 
+# ==== Модель входных данных ====
 class NatalRequest(BaseModel):
-    date: str
-    time: str
-    lat: float
-    lon: float
-    tz: float
+    date: str     # "2026-02-24"
+    time: str     # "14:32"
+    lat: float    # широта
+    lon: float    # долгота
+    tz: float     # часовой пояс
 
 
+# ==== Помощник ====
 def planet_data(chart, planet):
     obj = chart.get(planet)
     return {
@@ -28,6 +30,7 @@ def planet_data(chart, planet):
     }
 
 
+# ==== API ====
 @app.post("/natal")
 def calculate_natal(data: NatalRequest):
     dt = Datetime(data.date, data.time, data.tz)
@@ -35,15 +38,20 @@ def calculate_natal(data: NatalRequest):
     chart = Chart(dt, pos)
 
     planets = [
-        const.SUN, const.MOON, const.MERCURY, const.VENUS,
-        const.MARS, const.JUPITER, const.SATURN,
-        const.URANUS, const.NEPTUNE, const.PLUTO
+        const.SUN, const.MOON, const.MERCURY, const.VENUS, const.MARS,
+        const.JUPITER, const.SATURN, const.URANUS, const.NEPTUNE, const.PLUTO
     ]
 
     planet_list = [planet_data(chart, p) for p in planets]
 
-    houses = {str(i): {"cusp": round(chart.houses.cusp(i), 4)} for i in range(1, 13)}
+    # Дома
+    houses = {}
+    for i in range(1, 13):
+        houses[str(i)] = {
+            "cusp": round(chart.houses.cusp(i), 4)
+        }
 
+    # Аспекты
     aspect_list = []
     for a in aspects.MAJOR_ASPECTS:
         asp = chart.getAspect(a)
@@ -67,4 +75,4 @@ def calculate_natal(data: NatalRequest):
 
 @app.get("/")
 def home():
-    return {"status": "astro-ai backend работает"}
+    return {"status": "astro-ai backend работает!"}
